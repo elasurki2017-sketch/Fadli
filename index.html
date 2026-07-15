@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toll Parking Report</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      background: #f2f2f2;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: auto;
+      margin: auto;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 14px;
+    }
+
+    /* CARD */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+      margin-bottom: 15px;
+    }
+
+    /* HEADER PROFILE */
+    .profile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+    }
+
+    #profileStatus {
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    /* BUTTON */
+    button {
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .show {
+      width: 85px;
+      height: 38px;
+      background: #2196F3;
+      color: #fff;
+      font-size: 12px;
+    }
+
+    /* CARD IDENTITAS */
+    #profileCard {
+      display: none;
+      padding: 15px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      height: 42px;
+      padding: 0 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      font-size: 12px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    .edit, .save {
+      flex: 1;
+      height: 42px;
+      color: #fff;
+      font-size: 12px;
+    }
+
+    .edit { background: #ff9800; }
+    .save { background: #4CAF50; }
+
+    /* TABEL */
+    .table-card {
+      padding: 15px;
+    }
+
+    .table-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size:13px;
+    }
+
+    .table-wrapper{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+}
+
+#dataTable{
+    border-collapse:collapse;
+    table-layout:fixed;
+    min-width:995px;
+}
+
+#dataTable th,
+#dataTable td{
+    border:1px solid #000;
+    padding:8px;
+    text-align:center;
+    font-size:12px;
+    white-space:nowrap;
+}
+
+/* Final Balance */
+#balanceRow td{
+    border:1px solid #000;
+    font-weight:bold;
+    color:#000;
+}
+
+/* Teks "Final Balance" */
+#balanceRow td:nth-child(1){
+    background:#F44336;   /* sama dengan header Date */
+}
+
+/* Nilai Final Balance E-Money */
+#finalEmoneyBalance{
+    background:#42A5F5;   /* sama dengan header E-Money */
+}
+
+/* Nilai Final Balance Cash */
+#finalCashBalance{
+    background:#FFD54F;   /* sama dengan header Cash */
+}
+
+/* Kolom Action */
+#balanceRow td:last-child{
+    background:#fff;
+}
+
+#/* Header baris pertama */
+#dataTable thead tr:first-child th{
+    background:#1976D2;
+    color:#000;
+}
+
+/* Samakan warna E-Money dengan Top Up E-Money */
+#dataTable thead tr:first-child th:nth-child(3){
+    background:#42A5F5;
+}
+
+/* Header baris kedua */
+#dataTable thead tr:nth-child(2) th{
+    background:#42A5F5;
+    color:#000;
+}
+
+#dataTable tbody td{
+    background:#fff;
+}
+/* Header Cash */
+#dataTable thead tr:first-child th:nth-child(4){
+    background:#FFD54F;
+    color:#000;
+}
+/* Header Date, Activity, Action */
+#dataTable thead tr:first-child th:nth-child(1),
+#dataTable thead tr:first-child th:nth-child(2),
+#dataTable thead tr:first-child th:nth-child(5){
+    background:#F44336;
+    color:#000;
+}
+#dataTable thead tr:nth-child(2) th:nth-child(4),
+#dataTable thead tr:nth-child(2) th:nth-child(5),
+#dataTable thead tr:nth-child(2) th:nth-child(6){
+    background:#FFD54F;
+    color:#000;
+}
+/* Action */
+.icon-btn{
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.edit-btn{
+    color:#FF9800;
+}
+
+.delete-btn{
+    color:#F44336;
+}
+
+.add-btn{
+    color:#4CAF50;
+}
+
+.icon-btn:hover{
+    transform:scale(1.15);
+    transition:.2s;
+}
+
+.period-select{
+    width:100%;
+    height:40px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    padding:0 10px;
+    font-size:12px;
+    background:#fff;
+    margin:0;
+    font-weight: bold;
+}
+
+/* ================= MODAL ================= */
+
+.modal{
+    display:none;
+    position:fixed;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.45);
+    z-index:999;
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content{
+    width:92%;
+    max-width:420px;
+    background:#fff;
+    border-radius:12px;
+    padding:18px;
+    max-height:90vh;
+    overflow-y:auto;
+}
+
+.modal-content h3{
+    text-align:center;
+    margin-bottom:15px;
+    font-size:16px;
+}
+
+.section-title{
+    display:block;
+    text-align:center;
+    font-size:16px;
+    font-weight:bold;
+    margin:12px 0 10px;
+}
+    /* Kolom Action pada baris Final Balance */
+#balanceRow td:last-child{
+    background:#F44336;
+}
+
+.export-btn{
+    width:140px;
+    height:42px;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Toll Parking Report</h2>
+
+    <!-- PROFILE HEADER -->
+    <div class="card profile-header">
+      <span id="profileStatus">Profile ⚠️</span>
+      <button class="show" id="showBtn">Show</button>
+    </div>
+
+    <!-- FORM IDENTITAS -->
+    <div class="card" id="profileCard">
+      <label>Name</label>
+      <input type="text" id="name" placeholder="Input Name">
+
+      <label>User</label>
+      <input type="text" id="user" placeholder="Input User">
+
+      <label>Plat No. 1</label>
+      <input type="text" id="plat1" placeholder="Input Plat No. 1">
+
+      <label>Plat No. 2</label>
+      <input type="text" id="plat2" placeholder="Input Plat No. 2">
+
+      <div class="button-group">
+        <button class="edit" id="editBtn">Edit</button>
+        <button class="save" id="saveBtn">Save</button>
+      </div>
+      
+    </div>
+    
+    <!-- CARD PERIOD -->
+<div class="card" style="padding:15px;">
+    <table style="width:100%;min-width:100%;border-collapse:collapse;">
+        <tr>
+            <td style="width:80px;font-weight:bold;font-size:13px;">Period</td>
+
+            <td>
+                <select id="monthSelect" class="period-select">
+                    <option value="">Month</option>
+                    <option>January</option>
+                    <option>February</option>
+                    <option>March</option>
+                    <option>April</option>
+                    <option>May</option>
+                    <option>June</option>
+                    <option>July</option>
+                    <option>August</option>
+                    <option>September</option>
+                    <option>October</option>
+                    <option>November</option>
+                    <option>December</option>
+                </select>
+            </td>
+
+            <td>
+                <select id="yearSelect" class="period-select">
+                    <option value="">Year</option>
+                    <option>2025</option>
+                    <option>2026</option>
+                    <option>2027</option>
+                    <option>2028</option>
+                    <option>2029</option>
+                    <option>2030</option>
+                    <option>2031</option>
+                    <option>2032</option>
+                    <option>2033</option>
+                    <option>2034</option>
+                    <option>2035</option>
+                    <option>2036</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+    
+</div>
+    
+    <!-- CARD INPUT DATA -->
+    <div class="card table-card">
+      <div class="table-title">Input Data</div>
+      
+      <div class="table-wrapper">
+        <table id="dataTable">
+
+    <colgroup>
+    <col style="width:95px">    <!-- Date -->
+    <col style="width:140px">   <!-- Activity -->
+    <col style="width:110px">   <!-- E Top Up -->
+    <col style="width:110px">   <!-- E Expense -->
+    <col style="width:110px">   <!-- E Balance -->
+    <col style="width:110px">   <!-- Cash Top Up -->
+    <col style="width:110px">   <!-- Cash Expense -->
+    <col style="width:110px">   <!-- Cash Balance -->
+    <col style="width:100px">   <!-- Action -->
+</colgroup>
+
+    <thead>
+        <tr>
+            <th rowspan="2">Date</th>
+            <th rowspan="2">Activity</th>
+            <th colspan="3">E-Money</th>
+            <th colspan="3">Cash</th>
+            <th rowspan="2">Action</th>
+        </tr>
+        <tr>
+            <th>Top Up</th>
+            <th>Expense</th>
+            <th>Balance</th>
+            <th>Top Up</th>
+            <th>Expense</th>
+            <th>Balance</th>
+        </tr>
+    </thead>
+
+    <tbody id="tableBody">
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="action-cell">
+                <button class="icon-btn edit-btn" onclick="editRow(this)">✏️</button>
+                <button class="icon-btn delete-btn" onclick="deleteRow(this)">🗑️</button>
+                <button class="icon-btn add-btn" onclick="addRow(this)">➕</button>
+            </td>
+        </tr>
+    </tbody>
+<tfoot>
+    <tr id="balanceRow">
+        <td colspan="2"><b>Final Balance</b></td>
+
+        <td colspan="3" id="finalEmoneyBalance">
+            <b>Rp 0</b>
+        </td>
+
+        <td colspan="3" id="finalCashBalance">
+            <b>Rp 0</b>
+        </td>
+
+        <td></td>
+    </tr>
+</tfoot>
+</table>
+
+
+
+<!-- ================= MODAL INPUT DATA ================= -->
+<div id="inputModal" class="modal">
+
+    <div class="modal-content">
+
+        <h3>Input Data</h3>
+
+        <label>Date</label>
+        <input type="date" id="modalDate">
+
+        <label>Activity</label>
+        <input type="text" id="modalActivity" placeholder="Input Activity">
+
+        <label class="section-title">E-Money</label>
+
+        <label>Top Up</label>
+        <input type="text" id="modalEmoneyTopup" placeholder="Rp 0">
+
+        <label>Expense</label>
+        <input type="text" id="modalEmoneyExpense" placeholder="Rp 0">
+
+        <label class="section-title">Cash</label>
+
+        <label>Top Up</label>
+        <input type="text" id="modalCashTopup" placeholder="Rp 0">
+
+        <label>Expense</label>
+        <input type="text" id="modalCashExpense" placeholder="Rp 0">
+
+        <div class="button-group">
+            <button class="edit" onclick="closeInputModal()">Cancel</button>
+            <button class="save" onclick="saveRow()">Save</button>
+        </div>
+
+    </div>
+
+</div>
+
+
+      </div>
+    </div>
+    
+  </div>
+<div class="card" style="padding:15px;text-align:right;">
+    <button class="save export-btn" onclick="exportPDF()">
+    Export PDF
+</button>
+</div>
+  <script>
+      
+let editingRow = null;
+let editingIndex = -1;
+let isEdit = false;
+
+/* ================= GOOGLE SHEETS ================= */
+
+// Ganti setelah Apps Script selesai dibuat
+const API_URL = "https://script.google.com/macros/s/AKfycbxRgkqHTVtTPhWDgiE-CWBkOtBbU94OCrY83hSLmD-zxAs8obaKto-nlVr-GVeMH426rQ/exec";
+
+/* Menyimpan ID baris yang sedang diedit */
+let editingId = "";
+
+/* Membuat ID unik */
+function generateId(){
+
+    return Date.now().toString() +
+           Math.random().toString(36).substring(2,8);
+
+}
+
+
+
+async function api(data){
+
+    try{
+
+        const response = await fetch(API_URL,{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"text/plain;charset=utf-8"
+            },
+
+            body:JSON.stringify(data),
+
+            redirect:"follow"
+
+        });
+
+        if(!response.ok){
+            throw new Error("HTTP " + response.status);
+        }
+
+        return await response.json();
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+        alert(err.message);
+
+        return null;
+
+    }
+
+}
+
+function getCurrentPeriod(){
+
+    return monthSelect.value + "-" + yearSelect.value;
+
+}
+
+function getProfile(){
+
+    return JSON.parse(
+        localStorage.getItem(STORAGE_KEY)
+    ) || {};
+
+}
+
+function createRowObject(){
+
+    return{
+
+        id: editingId || generateId(),
+
+        period:getCurrentPeriod(),
+
+        date:document.getElementById("modalDate").value,
+
+        activity:document.getElementById("modalActivity").value,
+
+        eTopup:getNumber(modalEmoneyTopup.value),
+
+        eExpense:getNumber(modalEmoneyExpense.value),
+
+        eBalance:0,
+
+        cTopup:getNumber(modalCashTopup.value),
+
+        cExpense:getNumber(modalCashExpense.value),
+
+        cBalance:0
+
+    };
+
+}
+      
+    /* ELEMENT */
+    const profileCard = document.getElementById("profileCard");
+    const profileStatus = document.getElementById("profileStatus");
+    const showBtn = document.getElementById("showBtn");
+    const nameInput = document.getElementById("name");
+    const userInput = document.getElementById("user");
+    const plat1Input = document.getElementById("plat1");
+    const plat2Input = document.getElementById("plat2");
+    const editBtn = document.getElementById("editBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const modalEmoneyTopup = document.getElementById("modalEmoneyTopup");
+const modalEmoneyExpense = document.getElementById("modalEmoneyExpense");
+
+
+const modalCashTopup = document.getElementById("modalCashTopup");
+const modalCashExpense = document.getElementById("modalCashExpense");
+
+const monthSelect = document.getElementById("monthSelect");
+const yearSelect = document.getElementById("yearSelect");
+
+    /* LOCAL STORAGE */
+    const STORAGE_KEY = "profile_identity";
+
+    /* FUNGSI */
+    function lockInput() {
+      nameInput.disabled = true;
+      userInput.disabled = true;
+      plat1Input.disabled = true;
+      plat2Input.disabled = true;
+    }
+
+    function unlockInput() {
+      nameInput.disabled = false;
+      userInput.disabled = false;
+      plat1Input.disabled = false;
+      plat2Input.disabled = false;
+    }
+
+    function updateProfileStatus() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      profileStatus.innerHTML = data ? "Profile ✅" : "Profile ⚠️";
+    }
+
+    
+
+    function loadProfile() {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (!data) {
+        unlockInput();
+        return;
+      }
+      nameInput.value = data.name;
+      userInput.value = data.user;
+      plat1Input.value = data.plat1;
+      plat2Input.value = data.plat2;
+      lockInput();
+    }
+
+    /* SHOW / HIDE FORM */
+    showBtn.onclick = function() {
+      if (profileCard.style.display === "none" || profileCard.style.display === "") {
+        profileCard.style.display = "block";
+        showBtn.innerText = "Hide";
+      } else {
+        profileCard.style.display = "none";
+        showBtn.innerText = "Show";
+      }
+    };
+
+    /* SAVE DATA */
+    saveBtn.onclick = function() {
+      const name = nameInput.value.trim();
+      const user = userInput.value.trim();
+      const plat1 = plat1Input.value.trim();
+      const plat2 = plat2Input.value.trim();
+
+      /* VALIDASI */
+      if (name === "") { alert("Name tidak boleh kosong."); nameInput.focus(); return; }
+      if (user === "") { alert("User tidak boleh kosong."); userInput.focus(); return; }
+      if (plat1 === "") { alert("Plat No. 1 wajib diisi."); plat1Input.focus(); return; }
+
+      /* KONFIRMASI */
+      if (!confirm("Simpan data identitas?")) return;
+
+      /* SIMPAN */
+      const profile = { name, user, plat1, plat2 };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+
+      /* UPDATE TAMPILAN */
+      updateProfileStatus();
+      lockInput();
+      alert("Data berhasil disimpan.");
+    };
+
+    /* EDIT DATA */
+    editBtn.onclick = function() {
+      unlockInput();
+      nameInput.focus();
+    };
+
+    
+    
+    
+    /* EDIT */
+function editRow(btn){
+
+    editingRow = btn.closest("tr");
+
+editingId = editingRow.dataset.id || "";
+
+editingIndex = editingRow.rowIndex - 1;
+    editingIndex = editingRow.rowIndex - 1;
+
+    document.getElementById("modalDate").value =
+        editingRow.cells[0].innerText;
+
+    document.getElementById("modalActivity").value =
+        editingRow.cells[1].innerText;
+
+    modalEmoneyTopup.value =
+        editingRow.cells[2].innerText;
+
+    modalEmoneyExpense.value =
+        editingRow.cells[3].innerText;
+
+    modalCashTopup.value =
+        editingRow.cells[5].innerText;
+
+    modalCashExpense.value =
+        editingRow.cells[6].innerText;
+
+    isEdit = true;
+
+    openInputModal();
+
+}
+
+async function saveRow(){
+
+    const month = monthSelect.value;
+    const year = yearSelect.value;
+
+    if(month === "" || year === ""){
+        alert("Period (Month dan Year) wajib dipilih.");
+        return;
+    }
+
+    const profile = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+    if(
+        !profile ||
+        profile.name.trim() === "" ||
+        profile.user.trim() === "" ||
+        profile.plat1.trim() === ""
+    ){
+        alert("Silakan lengkapi dan simpan Data Identitas terlebih dahulu.");
+        return;
+    }
+
+    // lanjutkan kode save yang sudah ada...
+    const date = document.getElementById("modalDate").value.trim();
+    const activity = document.getElementById("modalActivity").value.trim();
+
+    const eTop = getNumber(modalEmoneyTopup.value);
+    const eExp = getNumber(modalEmoneyExpense.value);
+    const cTop = getNumber(modalCashTopup.value);
+    const cExp = getNumber(modalCashExpense.value);
+    
+    
+
+    /* ================= VALIDASI ================= */
+
+    if(date === ""){
+        alert("Date tidak boleh kosong.");
+        document.getElementById("modalDate").focus();
+        return;
+    }
+
+    // E-Money Top Up
+    const adaTopUp = (eTop > 0 || cTop > 0);
+const adaExpense = (eExp > 0 || cExp > 0);
+
+// Expense wajib ada Activity
+if (adaExpense && activity === "") {
+    alert("Activity wajib diisi jika ada Expense.");
+    document.getElementById("modalActivity").focus();
+    return;
+}
+
+// Hanya Top Up → Activity harus kosong
+if (adaTopUp && !adaExpense && activity !== "") {
+    alert("Activity harus kosong jika hanya melakukan Top Up.");
+    document.getElementById("modalActivity").focus();
+    return;
+}
+
+    // Cash Top Up
+    if(cTop > 0){
+
+        if(activity !== ""){
+            alert("Activity harus kosong jika Cash Top Up diisi.");
+            return;
+        }
+
+        
+
+        if(cExp > 0){
+            alert("Expense Cash harus kosong jika Cash Top Up diisi.");
+            return;
+        }
+
+    }
+
+    // Cash Expense
+    if(cExp > 0){
+
+        if(activity === ""){
+            alert("Activity wajib diisi jika Expense Cash diisi.");
+            return;
+        }
+
+        if(eTop > 0){
+            alert("E-Money Top Up harus kosong jika Expense Cash diisi.");
+            return;
+        }
+
+        
+
+    }
+
+    /* ================= KONFIRMASI ================= */
+
+    if(!confirm("Apakah data sudah benar?")){
+        closeInputModal();
+        return;
+    }
+
+    /* ================= SIMPAN ================= */
+
+    /* ================= HITUNG BALANCE BERJALAN ================= */
+const rowData = {
+
+    id: editingId || generateId(),
+
+    period: getCurrentPeriod(),
+
+    date: date,
+
+    activity: activity,
+
+    eTopup: eTop,
+
+    eExpense: eExp,
+
+    eBalance: 0,
+
+    cTopup: cTop,
+
+    cExpense: cExp,
+
+    cBalance: 0
+
+};
+
+let success = false;
+
+if(editingId){
+
+    success = await updateSheet(rowData);
+
+}else{
+
+    success = await saveSheet(rowData);
+
+}
+
+if(!success){
+    return;
+}
+
+editingId = rowData.id;
+
+editingRow.dataset.id = rowData.id;
+
+editingRow.dataset.filled = "true";
+
+editingRow.cells[0].innerText = date;
+editingRow.cells[1].innerText = activity;
+editingRow.cells[2].innerText = formatRupiah(eTop);
+editingRow.cells[3].innerText = formatRupiah(eExp);
+editingRow.cells[5].innerText = formatRupiah(cTop);
+editingRow.cells[6].innerText = formatRupiah(cExp);
+let eBalance = 0;
+let cBalance = 0;
+
+const rows = document.querySelectorAll("#tableBody tr");
+
+rows.forEach((row) => {
+
+    const topE = getNumber(row.cells[2].innerText);
+    const expE = getNumber(row.cells[3].innerText);
+    const topC = getNumber(row.cells[5].innerText);
+    const expC = getNumber(row.cells[6].innerText);
+
+    eBalance += topE - expE;
+    cBalance += topC - expC;
+
+    row.cells[4].innerText =
+        (topE > 0 || expE > 0) ? formatRupiah(eBalance) : "";
+
+    row.cells[7].innerText =
+        (topC > 0 || expC > 0) ? formatRupiah(cBalance) : "";
+
+});
+
+updateFinalBalance();
+    
+await loadSheet();
+
+
+closeInputModal();
+
+}
+
+/* DELETE */
+async function deleteRow(btn){
+
+    if(!confirm("Hapus data ini?")){
+        return;
+    }
+
+    const tbody = document.getElementById("tableBody");
+    const tr = btn.closest("tr");
+    
+    const id = tr.dataset.id || "";
+
+    if(id){
+
+    const success = await deleteSheet(id);
+
+    if(!success){
+        return;
+    }
+
+}
+
+    await loadSheet();
+return;
+
+
+}
+function updateFinalBalance() {
+
+    const rows = document.querySelectorAll("#tableBody tr");
+
+    let finalEmoney = "Rp 0";
+    let finalCash = "Rp 0";
+
+    for (let i = rows.length - 1; i >= 0; i--) {
+        if (rows[i].cells[4].innerText.trim() !== "") {
+            finalEmoney = rows[i].cells[4].innerText;
+            break;
+        }
+    }
+
+    for (let i = rows.length - 1; i >= 0; i--) {
+        if (rows[i].cells[7].innerText.trim() !== "") {
+            finalCash = rows[i].cells[7].innerText;
+            break;
+        }
+    }
+
+    document.getElementById("finalEmoneyBalance").innerText = finalEmoney;
+    document.getElementById("finalCashBalance").innerText = finalCash;
+}
+
+    
+
+
+function createEmptyRow(afterRow){
+
+    const tr = document.createElement("tr");
+
+    tr.dataset.filled = "false";
+    
+    tr.dataset.id = "";
+
+    tr.innerHTML = `
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+
+        <td class="action-cell">
+
+            <button class="icon-btn edit-btn"
+                onclick="editRow(this)">✏️</button>
+
+            <button class="icon-btn delete-btn"
+                onclick="deleteRow(this)">🗑️</button>
+
+            <button class="icon-btn add-btn"
+                onclick="addRow(this)">➕</button>
+
+        </td>
+    `;
+
+    afterRow.insertAdjacentElement("afterend", tr);
+
+}
+
+function formatRupiah(value){
+    value = String(value).replace(/\D/g, "");
+
+    if(value === "") return "";
+
+    return "Rp " + Number(value).toLocaleString("id-ID");
+}
+
+function getNumber(value){
+    return Number(String(value).replace(/[^\d]/g, "")) || 0;
+}
+
+function hitungBalance(){
+
+    const eTop = getNumber(modalEmoneyTopup.value);
+    const eExp = getNumber(modalEmoneyExpense.value);
+
+    
+
+    const cTop = getNumber(modalCashTopup.value);
+    const cExp = getNumber(modalCashExpense.value);
+
+    
+}
+
+[
+modalEmoneyTopup,
+modalEmoneyExpense,
+modalCashTopup,
+modalCashExpense
+].forEach(input=>{
+
+    input.addEventListener("input",function(){
+
+        this.value = formatRupiah(this.value);
+
+        hitungBalance();
+
+    });
+
+});
+
+function openInputModal() {
+    document.getElementById("inputModal").style.display = "flex";
+}
+
+function closeInputModal() {
+    document.getElementById("inputModal").style.display = "none";
+}
+
+/* ADD ROW */
+/* ADD ROW */
+function addRow(btn){
+
+    const currentRow = btn.closest("tr");
+
+    if(currentRow.dataset.filled !== "true"){
+        alert("Silakan isi data pada baris ini terlebih dahulu.");
+        return;
+    }
+
+    createEmptyRow(currentRow);
+
+    // saveLocal();
+}
+
+async function saveSheet(rowData){
+
+    const result = await api({
+
+        action: "save",
+
+        data: rowData
+
+    });
+
+    if(!result){
+        return false;
+    }
+
+    if(result.status !== "success"){
+        alert(result.message || "Gagal menyimpan data.");
+        return false;
+    }
+
+    return true;
+
+}
+
+async function updateSheet(rowData){
+
+    const result = await api({
+
+        action: "update",
+
+        data: rowData
+
+    });
+
+    if(!result){
+        return false;
+    }
+
+    if(result.status !== "success"){
+        alert(result.message || "Gagal mengubah data.");
+        return false;
+    }
+
+    return true;
+
+}
+
+async function deleteSheet(id){
+
+    const result = await api({
+
+        action:"delete",
+
+        id:id
+
+    });
+
+    if(!result){
+        return false;
+    }
+
+    if(result.status !== "success"){
+        alert(result.message || "Gagal menghapus data.");
+        return false;
+    }
+
+    return true;
+
+}
+
+async function loadSheet(){
+
+    const result = await api({
+
+        action:"load",
+
+        period:getCurrentPeriod()
+
+    });
+
+    if(!result){
+        return;
+    }
+
+    console.log(result);
+
+}
+
+async function loadSheet(){
+
+    const result = await api({
+
+        action:"load",
+
+        period:getCurrentPeriod()
+
+    });
+
+    if(!result){
+        return;
+    }
+
+    const tbody = document.getElementById("tableBody");
+
+    tbody.innerHTML = "";
+
+    let eBalance = 0;
+    let cBalance = 0;
+
+    if(result.data.length === 0){
+
+        const tr = document.createElement("tr");
+
+        tr.dataset.filled = "false";
+        tr.dataset.id = "";
+
+        tr.innerHTML = `
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+
+            <td class="action-cell">
+                <button class="icon-btn edit-btn" onclick="editRow(this)">✏️</button>
+                <button class="icon-btn delete-btn" onclick="deleteRow(this)">🗑️</button>
+                <button class="icon-btn add-btn" onclick="addRow(this)">➕</button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+
+        updateFinalBalance();
+
+        return;
+    }
+
+    result.data.forEach(item=>{
+
+        eBalance += Number(item.ETopUp) - Number(item.EExpense);
+        cBalance += Number(item.CTopUp) - Number(item.CExpense);
+
+        const tr = document.createElement("tr");
+
+        tr.dataset.filled = "true";
+        tr.dataset.id = item.ID;
+
+        tr.innerHTML = `
+
+            <td>${item.Date}</td>
+
+            <td>${item.Activity}</td>
+
+            <td>${formatRupiah(item.ETopUp)}</td>
+
+            <td>${formatRupiah(item.EExpense)}</td>
+
+            <td>${formatRupiah(eBalance)}</td>
+
+            <td>${formatRupiah(item.CTopUp)}</td>
+
+            <td>${formatRupiah(item.CExpense)}</td>
+
+            <td>${formatRupiah(cBalance)}</td>
+
+            <td class="action-cell">
+
+                <button class="icon-btn edit-btn"
+                onclick="editRow(this)">✏️</button>
+
+                <button class="icon-btn delete-btn"
+                onclick="deleteRow(this)">🗑️</button>
+
+                <button class="icon-btn add-btn"
+                onclick="addRow(this)">➕</button>
+
+            </td>
+
+        `;
+
+        tbody.appendChild(tr);
+
+    });
+
+    
+
+    updateFinalBalance();
+}
+monthSelect.value = localStorage.getItem("lastMonth") || "";
+yearSelect.value = localStorage.getItem("lastYear") || "";
+
+monthSelect.addEventListener("change", function(){
+
+    localStorage.setItem("lastMonth", this.value);
+
+    loadSheet();
+
+});
+
+yearSelect.addEventListener("change", function(){
+
+    localStorage.setItem("lastYear", this.value);
+
+    loadSheet();
+
+});
+
+window.onload = function () {
+
+    loadProfile();
+    updateProfileStatus();
+
+    let lastMonth = localStorage.getItem("lastMonth");
+    let lastYear = localStorage.getItem("lastYear");
+
+    // Jika belum pernah memilih period
+    if (!lastMonth) lastMonth = "January";
+    if (!lastYear) lastYear = new Date().getFullYear().toString();
+
+    monthSelect.value = lastMonth;
+    yearSelect.value = lastYear;
+
+    loadSheet();
+};
+
+
+    function exportPDF() {
+
+    // ================= DATA =================
+    const profile = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+    const month = monthSelect.value.trim();
+    const year = yearSelect.value.trim();
+
+    // ================= VALIDASI IDENTITAS =================
+    if (
+        !profile.name ||
+        !profile.user ||
+        !profile.plat1
+    ) {
+        alert("Silakan lengkapi dan simpan Data Identitas terlebih dahulu.");
+        return;
+    }
+
+    // ================= VALIDASI PERIOD =================
+    if (month === "" || year === "") {
+        alert("Period (Month dan Year) wajib dipilih.");
+        return;
+    }
+
+    // ================= VALIDASI DATA =================
+    const rows = document.querySelectorAll("#tableBody tr");
+
+    const adaData = [...rows].some(row => row.dataset.filled === "true");
+
+    if (!adaData) {
+        alert("Data tabel masih kosong.");
+        return;
+    }
+
+    // ================= KONFIRMASI =================
+    if (!confirm(`Export PDF ${month} ${year}?`)) {
+        return;
+    }
+
+    // ================= PDF =================
+    const { jsPDF } = window.jspdf;
+
+    const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+   
+
+// Background biru muda
+doc.setFillColor(220, 235, 255); // Light Blue
+doc.roundedRect(5, 5, pageWidth - 10, 18, 2, 2, "F");
+
+// Judul
+doc.setFont("helvetica", "bold");
+doc.setFontSize(14);
+doc.text("TOLL PARKING REPORT", pageWidth / 2, 12, {
+  align: "center"
+});
+
+// Periode
+doc.setFontSize(10);
+doc.text(`PERIOD ${month.toUpperCase()} ${year}`, pageWidth / 2, 18, {
+  align: "center"
+});
+
+doc.setFontSize(9);
+
+const x = 5;
+const y = 27;
+
+const width = 80;
+const labelWidth = 25;     // Kolom label
+const rowHeight = 7;
+const totalHeight = rowHeight * 4;
+
+doc.setDrawColor(0);
+doc.setLineWidth(0.2);
+
+// Bingkai luar
+doc.rect(x, y, width, totalHeight);
+
+// Garis vertikal pemisah label dan nilai
+doc.line(x + labelWidth, y, x + labelWidth, y + totalHeight);
+
+// Garis horizontal
+for (let i = 1; i < 4; i++) {
+    doc.line(x, y + (i * rowHeight), x + width, y + (i * rowHeight));
+}
+
+// Isi tabel
+doc.text("Name", x + 2, y + 5);
+doc.text(profile.name || "-", x + labelWidth + 2, y + 5);
+
+doc.text("User", x + 2, y + 12);
+doc.text(profile.user || "-", x + labelWidth + 2, y + 12);
+
+doc.text("Plat No.1", x + 2, y + 19);
+doc.text(profile.plat1 || "-", x + labelWidth + 2, y + 19);
+
+doc.text("Plat No.2", x + 2, y + 26);
+doc.text(profile.plat2 || "-", x + labelWidth + 2, y + 26);
+function formatPDFValue(value) {
+    value = value.trim();
+    return value === "" ? "-" : value;
+}
+    const body = [];
+
+    document.querySelectorAll("#tableBody tr").forEach(row => {
+
+    body.push([
+        row.cells[0].innerText,
+        row.cells[1].innerText,
+        formatPDFValue(row.cells[2].innerText),
+        formatPDFValue(row.cells[3].innerText),
+        formatPDFValue(row.cells[4].innerText),
+        formatPDFValue(row.cells[5].innerText),
+        formatPDFValue(row.cells[6].innerText),
+        formatPDFValue(row.cells[7].innerText)
+    ]);
+
+});
+
+    body.push([
+    {
+        content: "Final Balance",
+        colSpan: 2,
+        styles: {
+            fillColor: [239, 154, 154],
+            textColor: [0, 0, 0],
+            fontStyle: "bold",
+            halign: "center"
+        }
+    },
+    {
+        content: document.getElementById("finalEmoneyBalance").innerText,
+        colSpan: 3,
+        styles: {
+            fillColor: [66, 165, 245],
+            textColor: [0, 0, 0],
+            fontStyle: "bold",
+            halign: "center"
+        }
+    },
+    {
+        content: document.getElementById("finalCashBalance").innerText,
+        colSpan: 3,
+        styles: {
+            fillColor: [255, 213, 79],
+            textColor: [0, 0, 0],
+            fontStyle: "bold",
+            halign: "center"
+        }
+    }
+]);
+
+// Judul tabel data
+doc.setFont("helvetica", "bold");
+doc.setFontSize(11);
+doc.text(
+    "DETAILED TOLL PARKING",
+    pageWidth / 2,
+    y + totalHeight + 10,
+    { align: "center" }
+);
+
+    doc.autoTable({
+    startY: y + totalHeight + 14,
+
+    margin: {
+        left: 5,
+        right: 5
+    },
+
+    tableWidth: "auto",
+
+    head: [
+        [
+            { content: "Date", rowSpan: 2 },
+            { content: "Activity", rowSpan: 2 },
+            { content: "E-Money", colSpan: 3 },
+            { content: "Cash", colSpan: 3 }
+        ],
+        [
+            "Top Up",
+            "Expense",
+            "Balance",
+            "Top Up",
+            "Expense",
+            "Balance"
+        ]
+    ],
+
+    body: body,
+
+    theme: "grid",
+
+    headStyles: {
+        fontSize: 8,
+        halign: "center",
+        valign: "middle",
+        fontStyle: "bold",
+        textColor: [0, 0, 0],
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2
+    },
+
+    bodyStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2
+    },
+
+    alternateRowStyles: {
+        fillColor: [242, 242, 242]
+    },
+
+    didParseCell: function (data) {
+
+        // Header
+        if (data.section === "head") {
+
+            // Date & Activity
+            if (data.row.index === 0 &&
+                (data.column.index === 0 || data.column.index === 1)) {
+                data.cell.styles.fillColor = [244, 67, 54]   
+            }
+
+            // E-Money
+            if (
+                (data.row.index === 0 && data.column.index === 2) ||
+                (data.row.index === 1 &&
+                 data.column.index >= 2 &&
+                 data.column.index <= 4)
+            ) {
+                data.cell.styles.fillColor = [66,165,245];
+            }
+
+            // Cash
+            if (
+                (data.row.index === 0 && data.column.index === 5) ||
+                (data.row.index === 1 &&
+                 data.column.index >= 5 &&
+                 data.column.index <= 7)
+            ) {
+                data.cell.styles.fillColor = [255,213,79];
+            }
+
+            data.cell.styles.textColor = [0,0,0];
+            data.cell.styles.fontStyle = "bold";
+            data.cell.styles.halign = "center";
+            data.cell.styles.valign = "middle";
+        }
+
+        // Isi tabel
+        if (data.section === "body") {
+
+            // Tanda "-" rata kanan
+            if (String(data.cell.raw).trim() === "-") {
+                data.cell.styles.halign = "right";
+            }
+
+            // Baris Final Balance
+            if (data.row.index === body.length - 1) {
+
+                data.cell.styles.fontStyle = "bold";
+
+                if (data.column.index === 0) {
+                    data.cell.styles.fillColor = [244, 67, 54];
+                }
+
+                if (data.column.index === 4) {
+                    data.cell.styles.fillColor = [66,165,245];
+                }
+
+                if (data.column.index === 7) {
+                    data.cell.styles.fillColor = [255,213,79];
+                }
+            }
+        }
+    }
+});
+    
+const signY = doc.lastAutoTable.finalY + 20;
+const rightX = pageWidth - 60;
+const lineWidth = 45;
+
+// Titik tengah garis
+const centerX = rightX + (lineWidth / 2);
+
+// Tanggal (rata tengah)
+doc.setFont("helvetica", "normal");
+doc.setFontSize(9);
+doc.text(
+    `Jakarta, ${new Date().toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    })}`,
+    centerX,
+    signY,
+    { align: "center" }
+);
+
+// Garis tanda tangan
+doc.line(rightX, signY + 30, rightX + lineWidth, signY + 30);
+
+// Nama (rata tengah)
+doc.setFont("helvetica", "normal");
+doc.setFontSize(9); // atau 8 jika ingin lebih kecil
+doc.text(
+    profile.name || "-",
+    centerX,
+    signY + 35,
+    { align: "center" }
+);
+
+// ================= PAGE NUMBER =================
+const totalPages = doc.internal.getNumberOfPages();
+
+for (let i = 1; i <= totalPages; i++) {
+
+    doc.setPage(i);
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+
+    doc.text(
+        `${i}/${totalPages}`,
+        pageWidth - 10,
+        pageHeight - 8,
+        { align: "right" }
+    );
+}
+
+    doc.save("Toll_Parking_Report.pdf");
+
+}
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</body>
+</html>
